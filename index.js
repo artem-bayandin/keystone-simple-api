@@ -5,7 +5,7 @@ const { PasswordAuthStrategy } = require('@keystonejs/auth-password')
 const { MongooseAdapter } = require('@keystonejs/adapter-mongoose')
 const { createItem, getItems, updateItem } = require('@keystonejs/server-side-graphql-client')
 const { ...schema } = require('./schema')
-const config = require('./config')
+const config = require('./config.p')
 const { registerMergeCommentLike } = require('./schema/custom/mergeCommentLike')
 const { registerMergeUserLike } = require('./schema/custom/mergeUserLike')
 const { registerCurrentLoggedInUser } = require('./schema/custom/currentLoggedInUser')
@@ -72,9 +72,29 @@ registerMergeCommentLike(keystone)
 registerMergeUserLike(keystone)
 registerCurrentLoggedInUser(keystone)
 
+/* Standard KeystoneJS-only app */
+
+// module.exports = {
+//   keystone,
+//   apps: [
+//       new GraphQLApp(), 
+//       new AdminUIApp({ authStrategy })
+//     ]
+// }
+
+/* Custom servers as described in docs: https://www.keystonejs.com/guides/custom-server */
+
+/* Keystone app with ExpressJS middleware */
+
 module.exports = {
-  keystone,
-  apps: [
+    configureExpress: app => {
+        console.log('If you need any Express.js endpoints, you may put it here.')
+        app.use('/', async (req, res, next) => {
+            await next()
+        })
+    },
+    keystone,
+    apps: [
       new GraphQLApp(), 
       new AdminUIApp({ authStrategy })
     ]
